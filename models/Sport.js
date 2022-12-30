@@ -48,16 +48,6 @@ const Sport = db.define("Sport", {
     type: DataTypes.STRING,
     required: true,
   },
-  created_at: {
-    type: "TIMESTAMP",
-    defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-    allowNull: false,
-  },
-  updated_at: {
-    type: "TIMESTAMP",
-    defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-    allowNull: false,
-  },
 });
 
 Sport.belongsTo(User);
