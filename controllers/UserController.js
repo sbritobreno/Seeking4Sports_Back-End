@@ -1,19 +1,18 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const default_user_img = "../public/images/profile_img_default.png"
+const default_user_img = "../public/images/profile_img_default.png";
 const User = require("../models/User");
 
 // helpers
-// const getUserByToken = require('../helpers/get-user-by-token')
-// const getToken = require('../helpers/get-token')
-const createUserToken = require('../helpers/create-user-token')
-// const { imageUpload } = require('../helpers/image-upload')
+const getUserByToken = require('../helpers/get-user-by-token')
+const getToken = require('../helpers/get-token')
+const createUserToken = require("../helpers/create-user-token");
+const { imageUpload } = require('../helpers/image-upload')
 
 module.exports = class UserController {
-
   static async register(req, res) {
     const name = req.body.name;
-    const username = req.body.username
+    const username = req.body.username;
     const phone = req.body.phone;
     const email = req.body.email;
     const password = req.body.password;
@@ -46,21 +45,21 @@ module.exports = class UserController {
     }
 
     if (!confirmpassword) {
-      res
-        .status(422)
-        .json({ message: "Password confirmation is needed" });
+      res.status(422).json({ message: "Password confirmation is needed" });
       return;
     }
 
     if (password != confirmpassword) {
       res
         .status(422)
-        .json({ message: "Password and password confirmation have to be the same!" });
+        .json({
+          message: "Password and password confirmation have to be the same!",
+        });
       return;
     }
 
     // check if user exists
-    const userExists = await User.findOne({ where: {email: email} });
+    const userExists = await User.findOne({ where: { email: email } });
 
     if (userExists) {
       res.status(422).json({ message: "This email is already taken!" });
@@ -94,7 +93,7 @@ module.exports = class UserController {
     const password = req.body.password;
 
     if (!email) {
-      console.log(req.body.eamil)
+      console.log(req.body.eamil);
       res.status(422).json({ message: "You need to type your email!" });
       return;
     }
@@ -105,7 +104,7 @@ module.exports = class UserController {
     }
 
     // check if user exists
-    const user = await User.findOne({ where: {email: email} });
+    const user = await User.findOne({ where: { email: email } });
 
     if (!user) {
       return res
@@ -120,6 +119,6 @@ module.exports = class UserController {
       return res.status(422).json({ message: "Invalid password!" });
     }
 
-    await createUserToken(user, req, res)
+    await createUserToken(user, req, res);
   }
 };
