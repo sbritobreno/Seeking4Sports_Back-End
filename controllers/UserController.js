@@ -4,10 +4,10 @@ const default_user_img = "../public/images/profile_img_default.png";
 const User = require("../models/User");
 
 // helpers
-const getUserByToken = require('../helpers/get-user-by-token')
-const getToken = require('../helpers/get-token')
+const getUserByToken = require("../helpers/get-user-by-token");
+const getToken = require("../helpers/get-token");
 const createUserToken = require("../helpers/create-user-token");
-const { imageUpload } = require('../helpers/image-upload')
+const { imageUpload } = require("../helpers/image-upload");
 
 module.exports = class UserController {
   static async register(req, res) {
@@ -50,11 +50,9 @@ module.exports = class UserController {
     }
 
     if (password != confirmpassword) {
-      res
-        .status(422)
-        .json({
-          message: "Password and password confirmation have to be the same!",
-        });
+      res.status(422).json({
+        message: "Password and password confirmation have to be the same!",
+      });
       return;
     }
 
@@ -121,4 +119,34 @@ module.exports = class UserController {
 
     await createUserToken(user, req, res);
   }
+
+  static async checkUser(req, res) {
+    let currentUser;
+
+    if (req.headers.authorization) {
+      const token = getToken(req);
+      const decoded = jwt.verify(token, "s4ssecret");
+
+      currentUser = await User.findById(decoded.id);
+      currentUser.password = undefined;
+    } else {
+      currentUser = null;
+    }
+
+    res.status(200).send(currentUser);
+  }
+
+  static async getUserById(req, res) {
+    const id = req.params.id;
+    const user = await User.findById(id);
+
+    if (!user) {
+      res.status(422).json({ message: "User not found!" });
+      return;
+    }
+
+    res.status(200).json({ user });
+  }
+
+  
 };
