@@ -18,7 +18,7 @@ app.use(express.static('public'))
 const UserRoutes = require('./routes/UserRoutes')
 const SportRoutes = require('./routes/SportRoutes')
 
-// app.use('/user', UserRoutes)
+app.use('/user', UserRoutes)
 // app.use('/sport', SportRoutes)
 
 app.listen(5000)

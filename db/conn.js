@@ -4,7 +4,7 @@ const { Sequelize } = require("sequelize");
 const sequelize = new Sequelize(
   "seeking4sports",
   "root",
-  process.env.DB_PASSWORD,
+  "root123",
   {
     host: "localhost",
     dialect: "mysql",
@@ -17,5 +17,7 @@ try {
 } catch (err) {
   console.log(`Connection Failed: ${err}`);
 }
+
+sequelize.sync()
 
 module.exports = sequelize;

@@ -3,7 +3,7 @@ const db = require("../db/conn");
 
 const User = db.define("User", {
   id: {
-    type: type.INTEGER,
+    type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
@@ -30,16 +30,6 @@ const User = db.define("User", {
   image: {
     type: DataTypes.STRING,
     required: true,
-  },
-  created_at: {
-    type: "TIMESTAMP",
-    defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-    allowNull: false,
-  },
-  updated_at: {
-    type: "TIMESTAMP",
-    defaultValue: Sequelize.literal("CURRENT_TIMESTAMP"),
-    allowNull: false,
   },
 });
 
