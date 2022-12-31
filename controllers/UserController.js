@@ -42,6 +42,11 @@ module.exports = class UserController {
     if (!password) {
       res.status(422).json({ message: "Password is needed" });
       return;
+    } else if (password.length < 8) {
+      res.status(422).json({
+        error: "Password must be at least 8 characters!",
+      });
+      return;
     }
 
     if (!confirmpassword) {
@@ -91,7 +96,6 @@ module.exports = class UserController {
     const password = req.body.password;
 
     if (!email) {
-      console.log(req.body.eamil);
       res.status(422).json({ message: "You need to type your email!" });
       return;
     }
@@ -121,24 +125,24 @@ module.exports = class UserController {
   }
 
   static async checkUser(req, res) {
-    let currentUser;
+    let currentUser
 
     if (req.headers.authorization) {
-      const token = getToken(req);
-      const decoded = jwt.verify(token, "s4ssecret");
+      const token = getToken(req)
+      const decoded = jwt.verify(token, 's4ssecret')
 
-      currentUser = await User.findById(decoded.id);
-      currentUser.password = undefined;
+      currentUser = await User.findByPk(decoded.id)
+      currentUser.password = undefined
     } else {
-      currentUser = null;
+      currentUser = null
     }
 
-    res.status(200).send(currentUser);
+    res.status(200).send(currentUser)
   }
 
   static async getUserById(req, res) {
     const id = req.params.id;
-    const user = await User.findById(id);
+    const user = await User.findByPk(id);
 
     if (!user) {
       res.status(422).json({ message: "User not found!" });
@@ -148,5 +152,123 @@ module.exports = class UserController {
     res.status(200).json({ user });
   }
 
-  
+  static async editUser(req, res) {
+    const token = getToken(req);
+    const user = await getUserByToken(token);
+
+    const name = req.body.name;
+    const username = req.body.username;
+    const email = req.body.email;
+    const phone = req.body.phone;
+    const password = req.body.password;
+    const confirmpassword = req.body.confirmpassword;
+
+    let image = "";
+    if (req.file) {
+      image = req.file.filename;
+    }
+
+    // validations
+    if (!name) {
+      res.status(422).json({ message: "Name is needed!" });
+      return;
+    }
+    user.name = name;
+
+    if (!phone) {
+      res.status(422).json({ message: "Phone is needed!" });
+      return;
+    }
+    user.phone = phone;
+
+    // Username and Email are set to not be changed on the front-end
+
+    if (image) {
+      const imageName = req.file.filename;
+      user.image = imageName;
+    } else {
+      user.image = default_user_img;
+    }
+
+    // check if password match
+    if (password != confirmpassword) {
+      res.status(422).json({
+        error: "Password and password confirmation have to be the same!",
+      });
+    } else if (password.length < 8) {
+      res.status(422).json({
+        error: "Password must be at least 8 characters!",
+      });
+    } else if (password == confirmpassword) {
+      // creating new password
+      const salt = await bcrypt.genSalt(12);
+      const reqPassword = req.body.password;
+      const passwordHash = await bcrypt.hash(reqPassword, salt);
+      user.password = passwordHash;
+    }
+
+    try {
+      // returns updated data
+      user.save();
+      res.json({
+        message: "User details updated!",
+        data: user,
+      });
+    } catch (error) {
+      res.status(500).json({ message: error });
+    }
+  }
+
+  static async deleteUserAccount(req, res) {
+    const token = getToken(req);
+    const user = await getUserByToken(token);
+
+    // Delete user in the database
+    try {
+      await User.destroy({ where: { id: user.id } });
+      res.json({
+        message: "User deleted!",
+      });
+    } catch (error) {
+      res.status(500).json({ message: error });
+    }
+  }
+
+  static async resetUserPassword(req, res) {
+    const token = getToken(req);
+    const user = await getUserByToken(token);
+    const email = req.body.email;
+
+    // validations
+    if (!email) {
+      res
+        .status(422)
+        .json({ message: "Email is needed in order to reset password!" });
+      return;
+    }
+    user.email = email;
+
+    // check if user exists
+    const user_exists = await User.findOne({ where: { email: email } });
+
+    if (!user_exists) {
+      return res
+        .status(422)
+        .json({ message: "There is no user with this email!" });
+    }
+
+    // Create provisional password and send it to user's email
+    function getRandom() {
+      return Math.floor(
+        Math.pow(10, 8 - 1) + Math.random() * 9 * Math.pow(10, 8 - 1)
+      );
+    }
+    const salt = await bcrypt.genSalt(12);
+    const newPassword = getRandom();
+    const passwordHash = await bcrypt.hash(newPassword, salt);
+    user.password = passwordHash;
+
+    // Send newPassword to user's email
+    // To be implemented
+  }
 };
