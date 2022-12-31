@@ -125,19 +125,19 @@ module.exports = class UserController {
   }
 
   static async checkUser(req, res) {
-    let currentUser
+    let currentUser;
 
     if (req.headers.authorization) {
-      const token = getToken(req)
-      const decoded = jwt.verify(token, 's4ssecret')
+      const token = getToken(req);
+      const decoded = jwt.verify(token, "s4ssecret");
 
-      currentUser = await User.findByPk(decoded.id)
-      currentUser.password = undefined
+      currentUser = await User.findByPk(decoded.id);
+      currentUser.password = undefined;
     } else {
-      currentUser = null
+      currentUser = null;
     }
 
-    res.status(200).send(currentUser)
+    res.status(200).send(currentUser);
   }
 
   static async getUserById(req, res) {
@@ -264,11 +264,22 @@ module.exports = class UserController {
       );
     }
     const salt = await bcrypt.genSalt(12);
-    const newPassword = getRandom();
+    const newPassword = getRandom().toString();
     const passwordHash = await bcrypt.hash(newPassword, salt);
     user.password = passwordHash;
 
+    try {
+      // returns updated data
+      user.save();
+      res.json({
+        message: "User password reseted!",
+      });
+    } catch (error) {
+      res.status(500).json({ message: error });
+    }
+
     // Send newPassword to user's email
+    console.log(newPassword);
     // To be implemented
   }
 };

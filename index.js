@@ -17,8 +17,10 @@ app.use(express.static('public'))
 // Routes
 const UserRoutes = require('./routes/UserRoutes')
 const SportRoutes = require('./routes/SportRoutes')
+const ApiRoutes = require('./routes/ApiRoutes')
 
 app.use('/user', UserRoutes)
 // app.use('/sport', SportRoutes)
+app.use('/seeking4sports_api', ApiRoutes)
 
 app.listen(5000)
