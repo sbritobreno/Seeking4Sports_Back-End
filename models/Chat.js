@@ -5,7 +5,7 @@ const User = require("./User");
 
 const Chat = db.define("Chat", {
   id: {
-    type: type.INTEGER,
+    type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
@@ -17,6 +17,6 @@ const Chat = db.define("Chat", {
 
 Chat.belongsTo(Sport);
 Sport.hasOne(Chat);
-Chat.hasOne(User);
+Chat.hasMany(User);
 
 module.exports = Chat;

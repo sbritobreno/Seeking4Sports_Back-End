@@ -1,4 +1,4 @@
-module.exports = class UserController {
+module.exports = class Api_Controller {
 
   static getWeekdays(req, res) {
     const weekdays = { weekdays: ["Monday", "Tuesday", "Wednesday", "Thrusday", "Friday", "Saturday", "Sunday"] };

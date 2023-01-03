@@ -15,12 +15,12 @@ app.use(cors({ credentials: true, origin: 'http://localhost:3000'}))
 app.use(express.static('public'))
 
 // Routes
+const ApiRoutes = require('./routes/ApiRoutes')
 const UserRoutes = require('./routes/UserRoutes')
 const SportRoutes = require('./routes/SportRoutes')
-const ApiRoutes = require('./routes/ApiRoutes')
 
-app.use('/user', UserRoutes)
-// app.use('/sport', SportRoutes)
 app.use('/seeking4sports_api', ApiRoutes)
+app.use('/user', UserRoutes)
+app.use('/sport', SportRoutes)
 
 app.listen(5000)

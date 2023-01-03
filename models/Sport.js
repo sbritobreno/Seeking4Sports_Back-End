@@ -1,17 +1,14 @@
 const { DataTypes } = require("sequelize");
 const db = require("../db/conn");
 const User = require("./User");
+const Members = require("./Members");
 
 const Sport = db.define("Sport", {
   id: {
-    type: type.INTEGER,
+    type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true,
   },
-//   host: {
-//     type: DataTypes.STRING,
-//     required: true,
-//   },
   image: {
     type: DataTypes.STRING,
     required: true,
@@ -36,10 +33,6 @@ const Sport = db.define("Sport", {
     type: DataTypes.STRING,
     required: true,
   },
-  members: {
-    type: DataTypes.STRING,
-    required: true,
-  },
   total_players: {
     type: DataTypes.SMALLINT,
     required: true,
@@ -50,7 +43,8 @@ const Sport = db.define("Sport", {
   },
 });
 
+Sport.belongsToMany(User, { through: Members });
+User.belongsToMany(Sport, { through: Members });
 Sport.belongsTo(User);
-User.hasMany(Sport);
 
 module.exports = Sport;
