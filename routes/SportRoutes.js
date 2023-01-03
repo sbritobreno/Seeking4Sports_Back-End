@@ -8,5 +8,8 @@ const { imageUpload } = require('../helpers/image-upload')
 router.post('/newactivity', verifyToken, imageUpload.single("image"),SportController.createNewActivity)
 router.get('/', SportController.getAll)
 router.get('/myactivities', verifyToken, SportController.getMyActivities)
+router.get('/:id', SportController.getSportById)
+router.delete('/delete/:id', verifyToken, SportController.removeSportById)
+
 
 module.exports = router;

@@ -118,4 +118,50 @@ module.exports = class SportController {
       sports,
     });
   }
+
+  // get a specific activity
+  static async getSportById(req, res) {
+    const id = req.params.id
+
+    // check if activity exists
+    const activity = await Sport.findOne({where: { id: id }})
+
+    if (!activity) {
+      res.status(404).json({ message: 'Activity not found!' })
+      return
+    }
+
+    res.status(200).json({
+      activity: activity,
+    })
+  }
+
+  // remove a pet
+  static async removeSportById(req, res) {
+    const id = req.params.id
+
+    // check if activity exists
+    const activity = await Sport.findOne({where: { id: id }})
+
+    if (!activity) {
+      res.status(404).json({ message: 'Activity not found!' })
+      return
+    }
+
+    // check if user registered this pet
+    const token = getToken(req)
+    const user = await getUserByToken(token)
+
+    if (activity.UserId != user.id) {
+      res.status(500).json({
+        message:
+          'Can only be deleted by the Admin!',
+      })
+      return
+    }
+
+    await Sport.destroy({where: {id: id}})
+
+    res.status(200).json({ message: 'Activity deleted!' })
+  }
 };
