@@ -1,15 +1,10 @@
 require("dotenv").config();
 const { Sequelize } = require("sequelize");
 
-const sequelize = new Sequelize(
-  "seeking4sports",
-  "root",
-  "root123",
-  {
-    host: "localhost",
-    dialect: "mysql",
-  }
-);
+const sequelize = new Sequelize("seeking4sports", "root", "root123", {
+  host: "localhost",
+  dialect: "mysql",
+});
 
 try {
   sequelize.authenticate();
@@ -18,6 +13,6 @@ try {
   console.log(`Connection Failed: ${err}`);
 }
 
-sequelize.sync()
+sequelize.sync();
 
 module.exports = sequelize;

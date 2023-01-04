@@ -2,6 +2,7 @@ const { DataTypes } = require("sequelize");
 const db = require("../db/conn");
 const User = require("./User");
 const Members = require("./Members");
+const Chat = require("./Chat");
 
 const Sport = db.define("Sport", {
   id: {
@@ -46,5 +47,6 @@ const Sport = db.define("Sport", {
 Sport.belongsToMany(User, { through: Members });
 User.belongsToMany(Sport, { through: Members });
 Sport.belongsTo(User);
+Sport.hasOne(Chat);
 
 module.exports = Sport;

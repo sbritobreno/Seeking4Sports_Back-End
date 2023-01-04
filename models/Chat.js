@@ -15,8 +15,4 @@ const Chat = db.define("Chat", {
   },
 });
 
-Chat.belongsTo(Sport);
-Sport.hasOne(Chat);
-Chat.hasMany(User);
-
 module.exports = Chat;
