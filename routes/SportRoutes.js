@@ -23,7 +23,5 @@ router.delete(
   verifyToken,
   SportController.removeMember
 );
-//get chat
-//update chat
 
 module.exports = router;

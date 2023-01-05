@@ -1,7 +1,6 @@
 const Sport = require("../models/Sport");
 const User = require("../models/User");
 const Members = require("../models/Members");
-const Chat = require("../models/Chat");
 const default_sport_img = "../public/images/sport_img_default.png";
 const sequelize = require("sequelize");
 
