@@ -357,4 +357,32 @@ module.exports = class SportController {
       res.status(500).json({ message: error });
     }
   }
+
+  static async getNumberOfMembersMissing(req, res) {
+    const id = req.params.id;
+
+    const activity = await Sport.findOne({where: {id: id}});
+
+    if(!activity){
+      res.status(404).json({mesage: "Activity not found!"});
+      return;
+    }
+
+    const total_members = await Members.findAll({where: {SportId: id}})
+    console.log(total_members)
+
+    const members_missing = activity.total_players - total_members.length;
+    if(members_missing < 0){
+      members_missing = 0;
+    }
+
+    try{
+      res.json({
+        message: "Number of members missing loaded!",
+        data: members_missing
+      });
+    }catch{
+      res.status(500).json({ message: error });
+    }
+  }
 };

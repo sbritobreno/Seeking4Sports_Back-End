@@ -13,6 +13,7 @@ try {
   console.log(`Connection Failed: ${err}`);
 }
 
+//sequelize.sync({force: true});
 sequelize.sync();
 
 module.exports = sequelize;

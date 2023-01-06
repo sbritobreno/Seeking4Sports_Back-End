@@ -23,5 +23,6 @@ router.delete(
   verifyToken,
   SportController.removeMember
 );
+router.get("/:id/members_missing", SportController.getNumberOfMembersMissing);
 
 module.exports = router;
