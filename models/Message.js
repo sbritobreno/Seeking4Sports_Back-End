@@ -1,7 +1,5 @@
 const { DataTypes } = require("sequelize");
 const db = require("../db/conn");
-const User = require("./User");
-const Sport = require("./Sport");
 
 const Message = db.define("Message", {
   id: {
@@ -16,16 +14,16 @@ const Message = db.define("Message", {
   SportId: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'Sports',
-      key: 'id'
-    }
+      model: "Sports",
+      key: "id",
+    },
   },
   UserId: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'Users',
-      key: 'id'
-    }
+      model: "Users",
+      key: "id",
+    },
   },
 });
 

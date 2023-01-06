@@ -15,9 +15,13 @@ module.exports = class Api_Controller {
   }
 
   static getSportsList(req, res) {
-    const sportList = {
-      sportList: ["Football", "Voleyball", "Basketball", "Rugby", "Tennis"],
-    };
-    res.status(200).json(sportList);
+    const sportList = [
+      "Football",
+      "Voleyball",
+      "Basketball",
+      "Rugby",
+      "Tennis",
+    ];
+    res.status(200).json({ sport_list: sportList.sort() });
   }
 };

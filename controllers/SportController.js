@@ -46,8 +46,13 @@ module.exports = class SportController {
       return;
     }
 
-    if (!total_players) {
-      res.status(422).json({ message: "Number of total players is needed!" });
+    if (!total_players || total_players < 2) {
+      res
+        .status(422)
+        .json({
+          message:
+            "Number of total players is needed and has to be greater than 1!",
+        });
       return;
     }
 
@@ -104,7 +109,6 @@ module.exports = class SportController {
 
   // get all user activities
   static async getMyActivities(req, res) {
-    // get user
     const token = getToken(req);
     const user = await getUserByToken(token);
 
@@ -153,13 +157,13 @@ module.exports = class SportController {
       return;
     }
 
-    // check if user registered this activity
+    // check if user is the admin
     const token = getToken(req);
     const user = await getUserByToken(token);
 
     if (activity.UserId != user.id) {
       res.status(500).json({
-        message: "Can only be deleted by the Admin!",
+        message: "It can only be deleted by the Admin!",
       });
       return;
     }
@@ -176,6 +180,11 @@ module.exports = class SportController {
 
     // check if activity exists
     const activity = await Sport.findOne({ where: { id: id } });
+
+    if (!activity) {
+      res.status(404).json({ message: "Activity not found!" });
+      return;
+    }
 
     const sport = req.body.sport;
     const group_name = req.body.group_name;
@@ -217,8 +226,13 @@ module.exports = class SportController {
     }
     activity.location = location;
 
-    if (!total_players) {
-      res.status(422).json({ message: "Number of total players is needed!" });
+    if (!total_players || total_players < 2) {
+      res
+        .status(422)
+        .json({
+          message:
+            "Number of total players is needed and has to be greater than 1!",
+        });
       return;
     }
     activity.total_players = total_players;
@@ -237,7 +251,6 @@ module.exports = class SportController {
     }
 
     try {
-      // returns updated data
       await activity.save();
       res.json({
         message: "Activity details updated!",
@@ -361,27 +374,27 @@ module.exports = class SportController {
   static async getNumberOfMembersMissing(req, res) {
     const id = req.params.id;
 
-    const activity = await Sport.findOne({where: {id: id}});
+    const activity = await Sport.findOne({ where: { id: id } });
 
-    if(!activity){
-      res.status(404).json({mesage: "Activity not found!"});
+    if (!activity) {
+      res.status(404).json({ mesage: "Activity not found!" });
       return;
     }
 
-    const total_members = await Members.findAll({where: {SportId: id}})
-    console.log(total_members)
+    const total_members = await Members.findAll({ where: { SportId: id } });
+    console.log(total_members);
 
     const members_missing = activity.total_players - total_members.length;
-    if(members_missing < 0){
+    if (members_missing < 0) {
       members_missing = 0;
     }
 
-    try{
+    try {
       res.json({
         message: "Number of members missing loaded!",
-        data: members_missing
+        data: members_missing,
       });
-    }catch{
+    } catch {
       res.status(500).json({ message: error });
     }
   }

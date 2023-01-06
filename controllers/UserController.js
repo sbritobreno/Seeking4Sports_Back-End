@@ -12,9 +12,9 @@ const { imageUpload } = require("../helpers/image-upload");
 module.exports = class UserController {
   static async register(req, res) {
     const name = req.body.name;
-    const username = req.body.username;
+    const username = req.body.username.toLowerCase().trim();
     const phone = req.body.phone;
-    const email = req.body.email;
+    const email = req.body.email.toLowerCase().trim();
     const password = req.body.password;
     const confirmpassword = req.body.confirmpassword;
 
@@ -44,7 +44,7 @@ module.exports = class UserController {
       return;
     } else if (password.length < 8) {
       res.status(422).json({
-        error: "Password must be at least 8 characters!",
+        error: "Password must be at least 8 characters long!",
       });
       return;
     }
@@ -62,10 +62,19 @@ module.exports = class UserController {
     }
 
     // check if user exists
-    const userExists = await User.findOne({ where: { email: email } });
+    const userExistsEmail = await User.findOne({ where: { email: email } });
 
-    if (userExists) {
+    if (userExistsEmail) {
       res.status(422).json({ message: "This email is already taken!" });
+      return;
+    }
+
+    const userExistsUsername = await User.findOne({
+      where: { username: username },
+    });
+
+    if (userExistsUsername) {
+      res.status(422).json({ message: "This username is already taken!" });
       return;
     }
 
@@ -92,7 +101,7 @@ module.exports = class UserController {
   }
 
   static async login(req, res) {
-    const email = req.body.email;
+    const email = req.body.email.toLowerCase().trim();
     const password = req.body.password;
 
     if (!email) {
@@ -157,16 +166,17 @@ module.exports = class UserController {
     const user = await getUserByToken(token);
 
     const name = req.body.name;
-    const username = req.body.username;
-    const email = req.body.email;
     const phone = req.body.phone;
     const password = req.body.password;
     const confirmpassword = req.body.confirmpassword;
 
-    let image = "";
+    let img = "";
     if (req.file) {
-      image = req.file.filename;
+      img = req.file.filename;
+    } else {
+      img = default_user_img;
     }
+    user.image = img;
 
     // validations
     if (!name) {
@@ -182,13 +192,6 @@ module.exports = class UserController {
     user.phone = phone;
 
     // Username and Email are set to not be changed on the front-end
-
-    if (image) {
-      const imageName = req.file.filename;
-      user.image = imageName;
-    } else {
-      user.image = default_user_img;
-    }
 
     // check if password match
     if (password != confirmpassword) {
@@ -235,9 +238,7 @@ module.exports = class UserController {
   }
 
   static async resetUserPassword(req, res) {
-    const token = getToken(req);
-    const user = await getUserByToken(token);
-    const email = req.body.email;
+    const email = req.body.email.toLowerCase().trim();
 
     // validations
     if (!email) {
@@ -246,12 +247,11 @@ module.exports = class UserController {
         .json({ message: "Email is needed in order to reset password!" });
       return;
     }
-    user.email = email;
 
     // check if user exists
-    const user_exists = await User.findOne({ where: { email: email } });
+    const user = await User.findOne({ where: { email: email } });
 
-    if (!user_exists) {
+    if (!user) {
       return res
         .status(422)
         .json({ message: "There is no user with this email!" });

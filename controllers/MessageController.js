@@ -1,6 +1,4 @@
-const sequelize = require('sequelize')
-const Sport = require("../models/Sport");
-const User = require("../models/User");
+const sequelize = require("sequelize");
 const Members = require("../models/Members");
 const Message = require("../models/Message");
 
@@ -22,14 +20,18 @@ module.exports = class MessageController {
     });
 
     if (!isMember) {
-      res.status(422).json({ message: "User is not a member so you cannot access this activity chat!" });
+      res.status(422).json({
+        message:
+          "User is not a member so you cannot access this activity chat!",
+      });
       return;
     }
 
     try {
       // get messages from an activity
       const group_chat = await Message.findAll({
-        where: { SportId: sport_id }
+        where: { SportId: sport_id },
+        order: [["createdAt", "DESC"]],
       });
       res.json({
         message: "Chat from the activity loaded!",
@@ -54,17 +56,19 @@ module.exports = class MessageController {
     });
 
     if (!isMember) {
-      res.status(422).json({ message: "Only members can send messages to this activity!" });
+      res
+        .status(422)
+        .json({ message: "Only members can send messages to this activity!" });
       return;
     }
 
     // check if new message is null
-    if(!text){
+    if (!text) {
       res.status(422).json({ message: "You need to type something!" });
       return;
     }
 
-    const new_message = { message: text, SportId: sport_id, UserId: user.id}
+    const new_message = { message: text, SportId: sport_id, UserId: user.id };
 
     try {
       // add new message
