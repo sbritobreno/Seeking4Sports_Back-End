@@ -10,19 +10,18 @@ router.post("/login", UserController.login);
 router.get("/checkuser", UserController.checkUser);
 router.get("/:id", UserController.getUserById);
 router.patch(
-  "/edit/:id",
+  "/edit",
   verifyToken,
   imageUpload.single("image"),
   UserController.editUser
 );
 router.delete(
-  "/deleteaccount/:id",
+  "/deleteaccount",
   verifyToken,
   UserController.deleteUserAccount
 );
 router.patch(
-  "/resetpassword/:id",
-  verifyToken,
+  "/resetpassword",
   UserController.resetUserPassword
 );
 

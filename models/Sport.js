@@ -38,6 +38,10 @@ const Sport = db.define("Sport", {
     type: DataTypes.SMALLINT,
     required: true,
   },
+  missing_players: {
+    type: DataTypes.SMALLINT,
+    required: true,
+  },
   description: {
     type: DataTypes.STRING,
     required: true,

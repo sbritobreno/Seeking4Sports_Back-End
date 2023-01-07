@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const default_user_img = "../public/images/profile_img_default.png";
+const default_user_img = "profile_img_default.png";
 const User = require("../models/User");
 
 // helpers
@@ -12,9 +12,9 @@ const { imageUpload } = require("../helpers/image-upload");
 module.exports = class UserController {
   static async register(req, res) {
     const name = req.body.name;
-    const username = req.body.username.toLowerCase().trim();
+    const username = req.body.username;
     const phone = req.body.phone;
-    const email = req.body.email.toLowerCase().trim();
+    const email = req.body.email;
     const password = req.body.password;
     const confirmpassword = req.body.confirmpassword;
 
@@ -85,9 +85,9 @@ module.exports = class UserController {
     // create user
     const user = new User({
       name: name,
-      username: username,
+      username: username.toLowerCase().replace(" ", ""),
       phone: phone,
-      email: email,
+      email: email.toLowerCase().trim(),
       password: passwordHash,
       image: default_user_img,
     });
@@ -196,13 +196,15 @@ module.exports = class UserController {
     // check if password match
     if (password != confirmpassword) {
       res.status(422).json({
-        error: "Password and password confirmation have to be the same!",
+        message: "Password and password confirmation have to be the same!",
       });
-    } else if (password.length < 8) {
+      return;
+    } else if (password != null && password.length < 8) {
       res.status(422).json({
-        error: "Password must be at least 8 characters!",
+        message: "Password must be at least 8 characters!",
       });
-    } else if (password == confirmpassword) {
+      return;
+    } else if (password == confirmpassword && password != null) {
       // creating new password
       const salt = await bcrypt.genSalt(12);
       const reqPassword = req.body.password;

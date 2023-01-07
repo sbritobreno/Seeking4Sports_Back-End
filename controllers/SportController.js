@@ -1,7 +1,7 @@
 const Sport = require("../models/Sport");
 const User = require("../models/User");
 const Members = require("../models/Members");
-const default_sport_img = "../public/images/sport_img_default.png";
+const default_sport_img = "sport_img_default.png";
 const sequelize = require("sequelize");
 
 // helpers
@@ -18,6 +18,7 @@ module.exports = class SportController {
     const location = req.body.location;
     const image = req.files;
     const total_players = Number(req.body.total_players);
+    const missing_players = total_players - 1; // 1 == the user who is creating the activity
     const description = req.body.description;
 
     // validations
@@ -74,6 +75,7 @@ module.exports = class SportController {
       time: time,
       location: location,
       total_players: total_players,
+      missing_players: missing_players,
       description: description,
       UserId: user.id,
     };
@@ -310,6 +312,12 @@ module.exports = class SportController {
       return;
     }
 
+    const activity = await Sport.findOne({where: {id: id}})
+    if(!activity){
+      res.status(422).json({ message: "Activity does not exist!" });
+      return;
+    }
+
     const new_member = { SportId: id, UserId: user.id };
 
     try {
@@ -329,6 +337,12 @@ module.exports = class SportController {
     const user = await getUserByToken(token);
     const sport_id = req.params.sport_id;
     const member_id = req.params.member_id;
+
+    const activity = await Sport.findOne({where: {id: sport_id}})
+    if(!activity){
+      res.status(422).json({ message: "Activity does not exist!" });
+      return;
+    }
 
     // check if user is admin
     const isAdmin = await Sport.findOne({

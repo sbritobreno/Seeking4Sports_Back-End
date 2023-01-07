@@ -1,6 +1,7 @@
 const sequelize = require("sequelize");
 const Members = require("../models/Members");
 const Message = require("../models/Message");
+const Sport = require("../models/Sport");
 
 // helpers
 const getUserByToken = require("../helpers/get-user-by-token");
@@ -11,6 +12,16 @@ module.exports = class MessageController {
     const token = getToken(req);
     const user = await getUserByToken(token);
     const sport_id = req.params.sport_id;
+
+    const activity = await Sport.findOne({where: {id: sport_id}})
+
+    if (!activity) {
+      res.status(422).json({
+        message:
+          "Activity not found!",
+      });
+      return;
+    }
 
     // check if user is a member
     const isMember = await Members.findOne({
@@ -47,6 +58,16 @@ module.exports = class MessageController {
     const user = await getUserByToken(token);
     const sport_id = req.params.sport_id;
     const text = req.body.message_text;
+
+    const activity = await Sport.findOne({where: {id: sport_id}})
+
+    if (!activity) {
+      res.status(422).json({
+        message:
+          "Activity not found!",
+      });
+      return;
+    }
 
     // check if user is a member
     const isMember = await Members.findOne({

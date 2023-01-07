@@ -18,6 +18,7 @@ try {
   console.log(`Connection Failed: ${err}`);
 }
 
+// Reset all database data
 //sequelize.sync({force: true});
 sequelize.sync();
 
