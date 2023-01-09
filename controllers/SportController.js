@@ -16,7 +16,6 @@ module.exports = class SportController {
     const date = req.body.date;
     const time = req.body.time;
     const location = req.body.location;
-    const image = req.files;
     const total_players = Number(req.body.total_players);
     const missing_players = total_players - 1; // 1 == the user who is creating the activity
     const description = req.body.description;
@@ -48,12 +47,10 @@ module.exports = class SportController {
     }
 
     if (!total_players || total_players < 2) {
-      res
-        .status(422)
-        .json({
-          message:
-            "Number of total players is needed and has to be greater than 1!",
-        });
+      res.status(422).json({
+        message:
+          "Number of total players is needed and has to be greater than 1!",
+      });
       return;
     }
 
@@ -62,13 +59,20 @@ module.exports = class SportController {
       return;
     }
 
+    let img = "";
+    if (req.file) {
+      img = req.file.filename;
+    } else {
+      img = default_sport_img;
+    }
+
     // get user
     const token = getToken(req);
     const user = await getUserByToken(token);
 
     // create activity
     const activity = {
-      image: image,
+      image: img,
       sport: sport,
       group_name: group_name,
       date: date,
@@ -229,12 +233,10 @@ module.exports = class SportController {
     activity.location = location;
 
     if (!total_players || total_players < 2) {
-      res
-        .status(422)
-        .json({
-          message:
-            "Number of total players is needed and has to be greater than 1!",
-        });
+      res.status(422).json({
+        message:
+          "Number of total players is needed and has to be greater than 1!",
+      });
       return;
     }
     activity.total_players = total_players;
@@ -312,8 +314,8 @@ module.exports = class SportController {
       return;
     }
 
-    const activity = await Sport.findOne({where: {id: id}})
-    if(!activity){
+    const activity = await Sport.findOne({ where: { id: id } });
+    if (!activity) {
       res.status(422).json({ message: "Activity does not exist!" });
       return;
     }
@@ -322,6 +324,9 @@ module.exports = class SportController {
 
     try {
       // add user to the activity
+      // missing one less player to this activity
+      activity.missing_players--;
+      await activity.save();
       await Members.create(new_member);
       res.json({
         message: "You joined the group!",
@@ -338,8 +343,8 @@ module.exports = class SportController {
     const sport_id = req.params.sport_id;
     const member_id = req.params.member_id;
 
-    const activity = await Sport.findOne({where: {id: sport_id}})
-    if(!activity){
+    const activity = await Sport.findOne({ where: { id: sport_id } });
+    if (!activity) {
       res.status(422).json({ message: "Activity does not exist!" });
       return;
     }
@@ -385,7 +390,7 @@ module.exports = class SportController {
     }
   }
 
-  static async getNumberOfMembersMissing(req, res) {
+  static async getAdmin(req, res) {
     const id = req.params.id;
 
     const activity = await Sport.findOne({ where: { id: id } });
@@ -395,20 +400,46 @@ module.exports = class SportController {
       return;
     }
 
-    const total_members = await Members.findAll({ where: { SportId: id } });
-    console.log(total_members);
+    try {
+      const admin = await User.findOne({ where: { id: activity.UserId } });
+      res.json({
+        message: "Group admin loaded!",
+        admin: admin,
+      });
+    } catch (error) {
+      res.status(500).json({ message: error });
+    }
+  }
 
-    const members_missing = activity.total_players - total_members.length;
-    if (members_missing < 0) {
-      members_missing = 0;
+  static async getMembers(req, res) {
+    const id = req.params.id;
+    const members = [];
+
+    const activity = await Sport.findOne({ where: { id: id } });
+
+    if (!activity) {
+      res.status(404).json({ mesage: "Activity not found!" });
+      return;
+    }
+
+    const groupMembers = await Members.findAll({
+      where: { SportId: activity.id },
+    });
+
+    for (const member of groupMembers) {
+      const user = await User.findOne({ where: { id: member.UserId } });
+      user.password = undefined;
+      members.push(user);
+      console.log("sssssssssssssssss");
+      console.log(user);
     }
 
     try {
       res.json({
-        message: "Number of members missing loaded!",
-        data: members_missing,
+        message: "Group members loaded!",
+        members: members,
       });
-    } catch {
+    } catch (error) {
       res.status(500).json({ message: error });
     }
   }
