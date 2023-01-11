@@ -12,9 +12,9 @@ const { imageUpload } = require("../helpers/image-upload");
 module.exports = class UserController {
   static async register(req, res) {
     const name = req.body.name;
-    const username = req.body.username;
+    const username = req.body.username?.toLowerCase().replace(" ", "");
     const phone = req.body.phone;
-    const email = req.body.email;
+    const email = req.body.email?.toLowerCase().trim();
     const password = req.body.password;
     const confirmpassword = req.body.confirmpassword;
 
@@ -85,9 +85,9 @@ module.exports = class UserController {
     // create user
     const user = new User({
       name: name,
-      username: username.toLowerCase().replace(" ", ""),
+      username: username,
       phone: phone,
-      email: email.toLowerCase().trim(),
+      email: email,
       password: passwordHash,
       image: default_user_img,
     });
@@ -101,7 +101,7 @@ module.exports = class UserController {
   }
 
   static async login(req, res) {
-    const email = req.body.email.toLowerCase().trim();
+    const email = req.body.email?.toLowerCase().trim();
     const password = req.body.password;
 
     if (!email) {
@@ -127,7 +127,7 @@ module.exports = class UserController {
     const checkPassword = await bcrypt.compare(password, user.password);
 
     if (!checkPassword) {
-      return res.status(422).json({ message: "Invalid password!" });
+      return res.status(422).json({ message: "Email or Password invalid!" });
     }
 
     await createUserToken(user, req, res);
@@ -135,13 +135,16 @@ module.exports = class UserController {
 
   static async checkUser(req, res) {
     let currentUser;
+    let decoded;
 
     if (req.headers.authorization) {
       const token = getToken(req);
-      const decoded = jwt.verify(token, "s4ssecret");
+      if (token != "null") {
+        decoded = jwt.verify(token, "s4ssecret");
 
-      currentUser = await User.findByPk(decoded.id);
-      currentUser.password = undefined;
+        currentUser = await User.findByPk(decoded.id);
+        currentUser.password = undefined;
+      }
     } else {
       currentUser = null;
     }
@@ -240,7 +243,7 @@ module.exports = class UserController {
   }
 
   static async resetUserPassword(req, res) {
-    const email = req.body.email.toLowerCase().trim();
+    const email = req.body.email?.toLowerCase().trim();
 
     // validations
     if (!email) {

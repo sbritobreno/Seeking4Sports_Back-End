@@ -282,8 +282,17 @@ module.exports = class SportController {
       return;
     }
 
+    const activity = await Sport.findOne({ where: { id: id } });
+    if (!activity) {
+      res.status(422).json({ message: "Activity does not exist!" });
+      return;
+    }
+
     try {
-      // delete user from the activity
+      // remove user from the activity
+      // missing one more player to this activity
+      activity.missing_players++;
+      await activity.save();
       await Members.destroy({
         where: {
           [sequelize.Op.and]: [{ SportId: id }, { UserId: user.id }],

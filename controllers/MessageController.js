@@ -42,7 +42,7 @@ module.exports = class MessageController {
       // get messages from an activity
       const group_chat = await Message.findAll({
         where: { SportId: sport_id },
-        order: [["createdAt", "DESC"]],
+        order: [["createdAt", "ASC"]],
       });
       res.json({
         message: "Chat from the activity loaded!",
