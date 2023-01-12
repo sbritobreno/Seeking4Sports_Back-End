@@ -1,6 +1,7 @@
 const Sport = require("../models/Sport");
 const User = require("../models/User");
 const Members = require("../models/Members");
+const Message = require("../models/Message");
 const default_sport_img = "sport_img_default.png";
 const sequelize = require("sequelize");
 
@@ -127,6 +128,7 @@ module.exports = class SportController {
           ),
         },
       },
+      order: [["createdAt", "DESC"]],
     });
 
     res.status(200).json({
@@ -174,6 +176,7 @@ module.exports = class SportController {
       return;
     }
 
+    await Message.destroy({where: {SportId: id}})
     await Sport.destroy({ where: { id: id } });
 
     res.status(200).json({ message: "Activity deleted!" });
