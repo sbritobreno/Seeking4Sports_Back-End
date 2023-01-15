@@ -11,7 +11,7 @@ const createUserToken = async (user, req, res) => {
 
   // return token
   res.status(200).json({
-    message: "You are authenticated!",
+    message: "You are now Logged in!",
     token: token,
     userId: user.id,
   });

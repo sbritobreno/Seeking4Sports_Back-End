@@ -15,7 +15,7 @@ router.get("/", SportController.getAll);
 router.get("/myactivities", verifyToken, SportController.getMyActivities);
 router.get("/:id", SportController.getSportById);
 router.delete("/delete/:id", verifyToken, SportController.removeSportById);
-router.patch("/edit/:id", verifyToken, SportController.editActivity);
+router.patch("/edit/:id", verifyToken, imageUpload.single("image"), SportController.editActivity);
 router.delete("/leavegroup/:id", verifyToken, SportController.leaveActivity);
 router.post("/joingroup/:id", verifyToken, SportController.joinActivity);
 router.delete(

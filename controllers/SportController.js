@@ -183,8 +183,6 @@ module.exports = class SportController {
   }
 
   static async editActivity(req, res) {
-    const token = getToken(req);
-    const user = await getUserByToken(token);
     const id = req.params.id;
 
     // check if activity exists
@@ -200,9 +198,12 @@ module.exports = class SportController {
     const date = req.body.date;
     const time = req.body.time;
     const location = req.body.location;
-    const image = req.files;
     const total_players = Number(req.body.total_players);
     const description = req.body.description;
+
+    if (req.file) {
+      activity.image = req.file.filename;
+    }
 
     // validations
     if (!sport) {
@@ -250,12 +251,15 @@ module.exports = class SportController {
     }
     activity.description = description;
 
-    if (image) {
-      const imageName = req.file.filename;
-      user.image = imageName;
-    } else {
-      user.image = default_sport_img;
-    }
+    const totalMembers = await Members.findAll({
+      where: { SportId: id },
+    });
+    
+    activity.missing_players = activity.total_players - totalMembers.length;
+    
+    if(activity.missing_players < 0){
+      activity.missing_players = 0;
+    } 
 
     try {
       await activity.save();
@@ -291,11 +295,11 @@ module.exports = class SportController {
       return;
     }
 
+    activity.missing_players++;
+    await activity.save();
+    
     try {
       // remove user from the activity
-      // missing one more player to this activity
-      activity.missing_players++;
-      await activity.save();
       await Members.destroy({
         where: {
           [sequelize.Op.and]: [{ SportId: id }, { UserId: user.id }],
@@ -334,11 +338,11 @@ module.exports = class SportController {
 
     const new_member = { SportId: id, UserId: user.id };
 
+    activity.missing_players--;
+    await activity.save();
+    
     try {
       // add user to the activity
-      // missing one less player to this activity
-      activity.missing_players--;
-      await activity.save();
       await Members.create(new_member);
       res.json({
         message: "You joined the group!",
@@ -386,6 +390,9 @@ module.exports = class SportController {
         .json({ message: "the user to be removed is not a member!" });
       return;
     }
+
+    activity.missing_players++;
+    await activity.save();
 
     try {
       // delete user from the activity
@@ -438,13 +445,12 @@ module.exports = class SportController {
       where: { SportId: activity.id },
     });
 
-    for (const member of groupMembers) {
-      const user = await User.findOne({ where: { id: member.UserId } });
-      user.password = undefined;
-      members.push(user);
-      console.log("sssssssssssssssss");
-      console.log(user);
-    }
+    await Promise.all(
+      groupMembers.map(async (member) => {
+        const user = await User.findOne({ where: { id: member.UserId } });
+        members.push(user);
+      })
+    );
 
     try {
       res.json({
@@ -454,5 +460,15 @@ module.exports = class SportController {
     } catch (error) {
       res.status(500).json({ message: error });
     }
+  }
+
+  static async updateNumberOfMembers(id) {
+    const activity = await Sport.findOne({ where: { id: id } });
+    const totalMembers = await Members.findAll({
+      where: { SportId: id },
+    });
+    
+    activity.missing_players = total_players - totalMembers.length;
+    activity.save();
   }
 };

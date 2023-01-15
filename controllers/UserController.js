@@ -8,6 +8,9 @@ const getUserByToken = require("../helpers/get-user-by-token");
 const getToken = require("../helpers/get-token");
 const createUserToken = require("../helpers/create-user-token");
 const { imageUpload } = require("../helpers/image-upload");
+const Members = require("../models/Members");
+const Sport = require("../models/Sport");
+const Message = require("../models/Message");
 
 module.exports = class UserController {
   static async register(req, res) {
@@ -118,9 +121,7 @@ module.exports = class UserController {
     const user = await User.findOne({ where: { email: email } });
 
     if (!user) {
-      return res
-        .status(422)
-        .json({ message: "There is no user with this email!" });
+      return res.status(422).json({ message: "Account not found!" });
     }
 
     // check if password match
@@ -173,13 +174,9 @@ module.exports = class UserController {
     const password = req.body.password;
     const confirmpassword = req.body.confirmpassword;
 
-    let img = "";
     if (req.file) {
-      img = req.file.filename;
-    } else {
-      img = default_user_img;
+      user.image = req.file.filename;
     }
-    user.image = img;
 
     // validations
     if (!name) {
@@ -233,7 +230,25 @@ module.exports = class UserController {
 
     // Delete user in the database
     try {
+      // Delete all activities where user is an admin and removes user from the activites where they are members.
+      await Sport.destroy({ where: { UserId: user.id } });
+      await Members.destroy({ where: { UserId: user.id } });
+
+      // Unset foreing key on messages send by the user to be deleted
+      const userMessages = await Message.findAll({
+        where: { UserId: user.id },
+      });
+
+      await Promise.all(
+        userMessages.map(async (msg) => {
+          msg.UserId = null;
+          await msg.save();
+        })
+      );
+
+      // Delete the user
       await User.destroy({ where: { id: user.id } });
+
       res.json({
         message: "User deleted!",
       });
