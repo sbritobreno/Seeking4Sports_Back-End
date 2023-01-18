@@ -109,6 +109,9 @@ module.exports = class SportController {
       order: [["createdAt", "DESC"]],
     });
 
+    // Update number of missing players
+    sports.map((s) => SportController.updateNumberOfMembers(s.id));
+
     res.status(200).json({
       sports: sports,
     });
@@ -176,7 +179,7 @@ module.exports = class SportController {
       return;
     }
 
-    await Message.destroy({where: {SportId: id}})
+    await Message.destroy({ where: { SportId: id } });
     await Sport.destroy({ where: { id: id } });
 
     res.status(200).json({ message: "Activity deleted!" });
@@ -251,18 +254,9 @@ module.exports = class SportController {
     }
     activity.description = description;
 
-    const totalMembers = await Members.findAll({
-      where: { SportId: id },
-    });
-    
-    activity.missing_players = activity.total_players - totalMembers.length;
-    
-    if(activity.missing_players < 0){
-      activity.missing_players = 0;
-    } 
-
     try {
       await activity.save();
+      SportController.updateNumberOfMembers(activity.id);
       res.json({
         message: "Activity details updated!",
         data: activity,
@@ -297,7 +291,7 @@ module.exports = class SportController {
 
     activity.missing_players++;
     await activity.save();
-    
+
     try {
       // remove user from the activity
       await Members.destroy({
@@ -340,7 +334,7 @@ module.exports = class SportController {
 
     activity.missing_players--;
     await activity.save();
-    
+
     try {
       // add user to the activity
       await Members.create(new_member);
@@ -467,8 +461,11 @@ module.exports = class SportController {
     const totalMembers = await Members.findAll({
       where: { SportId: id },
     });
-    
-    activity.missing_players = total_players - totalMembers.length;
+
+    activity.missing_players = activity.total_players - totalMembers.length;
+    if (activity.missing_players < 0) {
+      activity.missing_players = 0;
+    }
     activity.save();
   }
 };

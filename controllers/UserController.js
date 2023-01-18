@@ -11,6 +11,7 @@ const { imageUpload } = require("../helpers/image-upload");
 const Members = require("../models/Members");
 const Sport = require("../models/Sport");
 const Message = require("../models/Message");
+const SportController = require("./SportController");
 
 module.exports = class UserController {
   static async register(req, res) {
@@ -227,14 +228,13 @@ module.exports = class UserController {
   static async deleteUserAccount(req, res) {
     const token = getToken(req);
     const user = await getUserByToken(token);
-
-    // Delete user in the database
+    
     try {
       // Delete all activities where user is an admin and removes user from the activites where they are members.
       await Sport.destroy({ where: { UserId: user.id } });
       await Members.destroy({ where: { UserId: user.id } });
 
-      // Unset foreing key on messages send by the user to be deleted
+      // Unset foreing key on messages sent by the user to be deleted
       const userMessages = await Message.findAll({
         where: { UserId: user.id },
       });
