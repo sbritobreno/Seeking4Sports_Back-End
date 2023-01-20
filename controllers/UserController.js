@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const default_user_img = "profile_img_default.png";
 const User = require("../models/User");
+const sendEmail = require("../helpers/email-send");
 
 // helpers
 const getUserByToken = require("../helpers/get-user-by-token");
@@ -91,14 +92,36 @@ module.exports = class UserController {
       name: name,
       username: username,
       phone: phone,
-      email: email,
+      email: "", // email will be only set after confirmation through the user email.
       password: passwordHash,
       image: default_user_img,
     });
 
     try {
-      const newUser = await user.save();
-      await createUserToken(newUser, req, res);
+      await user.save();
+      // Send a new user a confirmation email.
+      sendEmail(username, email);
+      res.status(200).json({ message: "Verification sent to user email!" });
+    } catch (error) {
+      res.status(500).json({ message: error });
+    }
+  }
+
+  static async confirmEmail(req, res) {
+    const email = req.params.email;
+    const username = req.params.email;
+
+    const user = User.findOne({ where: { username: username } });
+
+    if (!user) {
+      return res.status(422).json({ message: "User not found!" });
+    }
+
+    try {
+      // Set user email
+      user.email = email;
+      user.save();
+      await createUserToken(user, req, res);
     } catch (error) {
       res.status(500).json({ message: error });
     }
@@ -228,7 +251,7 @@ module.exports = class UserController {
   static async deleteUserAccount(req, res) {
     const token = getToken(req);
     const user = await getUserByToken(token);
-    
+
     try {
       // Delete all activities where user is an admin and removes user from the activites where they are members.
       await Sport.destroy({ where: { UserId: user.id } });

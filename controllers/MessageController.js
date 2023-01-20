@@ -57,7 +57,7 @@ module.exports = class MessageController {
     const token = getToken(req);
     const user = await getUserByToken(token);
     const sport_id = req.params.sport_id;
-    const text = req.body.message_text;
+    const text = req.body.message_text?.trim();
 
     const activity = await Sport.findOne({where: {id: sport_id}})
 
