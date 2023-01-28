@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const default_user_img = "profile_img_default.png";
 const User = require("../models/User");
 const sendEmail = require("../helpers/email-send");
+const templates = require("../helpers/email-templates");
 
 // helpers
 const getUserByToken = require("../helpers/get-user-by-token");
@@ -100,7 +101,7 @@ module.exports = class UserController {
     try {
       await user.save();
       // Send a new user a confirmation email.
-      sendEmail(username, email);
+      sendEmail(email, templates.confirm(email, username));
       res.status(200).json({ message: "Verification sent to user email!" });
     } catch (error) {
       res.status(500).json({ message: error });
@@ -109,10 +110,10 @@ module.exports = class UserController {
 
   static async confirmEmail(req, res) {
     const email = req.params.email;
-    const username = req.params.email;
+    const username = req.params.username;
 
-    const user = User.findOne({ where: { username: username } });
-
+    const user = await User.findOne({ where: { username: username } });
+    
     if (!user) {
       return res.status(422).json({ message: "User not found!" });
     }
@@ -121,7 +122,7 @@ module.exports = class UserController {
       // Set user email
       user.email = email;
       user.save();
-      await createUserToken(user, req, res);
+      res.status(200).json({ message: "Email is confirmed!" });
     } catch (error) {
       res.status(500).json({ message: error });
     }
@@ -314,15 +315,12 @@ module.exports = class UserController {
     try {
       // returns updated data
       user.save();
+      sendEmail(email, templates.resetPassword(newPassword));
       res.json({
-        message: "User password reseted!",
+        message: `A new passord was sent to ${email}!`,
       });
     } catch (error) {
       res.status(500).json({ message: error });
     }
-
-    // Send newPassword to user's email
-    console.log(newPassword);
-    // To be implemented
   }
 };

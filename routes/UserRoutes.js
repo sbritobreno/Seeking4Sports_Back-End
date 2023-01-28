@@ -24,6 +24,6 @@ router.patch(
   "/resetpassword",
   UserController.resetUserPassword
 );
-router.get("/email/confirm/:id", UserController.confirmEmail);
+router.post("/email/confirm/:email/:username", UserController.confirmEmail);
 
 module.exports = router;
