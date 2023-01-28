@@ -1,31 +1,60 @@
 module.exports = class Api_Controller {
-  static getWeekdays(req, res) {
-    const weekdays = {
-      weekdays: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thrusday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ],
-    };
-    res.status(200).json(weekdays);
-  }
-
   static getSportsList(req, res) {
     const sportList = [
       "Football",
-      "Voleyball",
+      "Golf",
+      "Cricket",
+      "Volleyball",
       "Basketball",
       "Rugby",
       "Tennis",
+      "Boxing",
+      "Hockey",
+      "Baseball",
+      "Wrestling",
+      "Swimming",
+      "Athletics",
+      "Bowling",
+      "Table Tennis",
+      "Polo",
+      "American Football",
+      "Cross Country",
+      "Surfing",
+      "Diving",
+      "Sprint Running",
+      "Sailing",
+      "Archery",
+      "Dressage",
+      "Badminton",
+      "Karate",
+      "Triathlon",
+      "Kickboxing",
+      "Motocross",
+      "Judo",
+      "Taekwondo",
+      "Lacrosse",
+      "Snooker",
+      "Gaelic football",
+      "Hurling",
+      "Rowing",
+      "Snowboarding",
+      "Weightlifting",
+      "Futsal",
+      "Squash",
+      "Handball",
+      "Target Shooting",
+      "Camogie",
+      "Gaelic handball",
+      "Rounders",
+      "Gymnastics",
+      "Other Martial arts",
+      "Other Motorsport",
+      "Other Water sports",
     ];
     res.status(200).json({ sport_list: sportList.sort() });
   }
 
-  static getCities(req, res){
+  static getCities(req, res) {
     //cities and towns in Ireland
     const cities = [
       "Abbeyfeale",
@@ -508,8 +537,8 @@ module.exports = class Api_Controller {
       "Mullagh",
       "Newtown Cunningham",
       "Ramelton",
-      "Raphoe"
-  ]
-  res.status(200).json({ cities: cities.sort() });
+      "Raphoe",
+    ];
+    res.status(200).json({ cities: cities.sort() });
   }
 };
